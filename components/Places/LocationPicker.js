@@ -13,11 +13,11 @@ import {
 
 import { Colors } from '../../constants/colors';
 import OutlinedButton from '../UI/OutlinedButton';
-import { getMapPreview } from '../../util/location';
+import { getAddress, getMapPreview } from '../../util/location';
 
-function LocationPicker({onPickLocation}) {
+function LocationPicker({ onPickLocation }) {
   const [pickedLocation, setPickedLocation] = useState();
-  const isFocused = useIsFocused();//is a boolean that provides the current focus screen state
+  const isFocused = useIsFocused();
 
   const navigation = useNavigation();
   const route = useRoute();
@@ -36,9 +36,18 @@ function LocationPicker({onPickLocation}) {
   }, [route, isFocused]);
 
   useEffect(() => {
-    onPickLocation(pickedLocation)
-  }, [pickedLocation, onPickLocation])
-  
+    async function handleLocation() {
+      if (pickedLocation) {
+        const address = await getAddress(
+          pickedLocation.lat,
+          pickedLocation.lng
+        );
+        onPickLocation({ ...pickedLocation, address: address });
+      }
+    }
+
+    handleLocation();
+  }, [pickedLocation, onPickLocation]);
 
   async function verifyPermissions() {
     if (
